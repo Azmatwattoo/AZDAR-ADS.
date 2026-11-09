@@ -1,0 +1,484 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AzDar Ads Watching</title>
+
+<style>
+* {
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+}
+
+body {
+  background:#07111f;
+  color:#f5f8ff;
+  font-family:Arial,sans-serif;
+  padding:16px;
+}
+
+header {
+  text-align:center;
+  padding:18px 5px 25px;
+}
+
+header h1 {
+  color:#00e5ff;
+  font-size:27px;
+  letter-spacing:1px;
+  text-shadow:0 0 15px #00e5ff66;
+}
+
+header p {
+  color:#9baec4;
+  margin-top:8px;
+  font-size:13px;
+}
+
+.earning-box {
+  background:linear-gradient(135deg,#101d30,#182b45);
+  border:1px solid #00e5ff55;
+  border-radius:18px;
+  padding:25px 15px;
+  text-align:center;
+  margin-bottom:20px;
+  box-shadow:0 0 20px #00e5ff12;
+}
+
+.earning-box small {
+  color:#a8bed4;
+  letter-spacing:2px;
+}
+
+.earning {
+  color:#00e5ff;
+  font-size:40px;
+  font-weight:bold;
+  margin:12px 0;
+}
+
+.progress-info {
+  display:flex;
+  justify-content:space-between;
+  margin-bottom:10px;
+  color:#c7d7e8;
+  font-size:14px;
+}
+
+.progress-bg {
+  height:9px;
+  background:#26384c;
+  border-radius:20px;
+  overflow:hidden;
+}
+
+.progress-fill {
+  height:100%;
+  width:0%;
+  background:linear-gradient(90deg,#00e5ff,#a855f7);
+  transition:.3s;
+}
+
+.section-title {
+  margin:25px 0 15px;
+  color:#00e5ff;
+  font-size:19px;
+}
+
+.video-grid {
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:13px;
+}
+
+.video-card {
+  background:#101d30;
+  border:1px solid #253b53;
+  border-radius:14px;
+  overflow:hidden;
+  padding:9px;
+  min-width:0;
+}
+
+.video-card video {
+  display:block;
+  width:100%;
+  aspect-ratio:16/9;
+  background:#000;
+  border-radius:9px;
+  object-fit:contain;
+}
+
+.video-card h3 {
+  font-size:14px;
+  margin:10px 0 7px;
+}
+
+.video-status {
+  font-size:12px;
+  color:#00e5ff;
+  margin-bottom:8px;
+}
+
+.timer-bg {
+  height:5px;
+  background:#293c51;
+  border-radius:10px;
+  overflow:hidden;
+  margin-bottom:10px;
+}
+
+.timer-fill {
+  width:0%;
+  height:100%;
+  background:#00e5ff;
+}
+
+.watch-btn {
+  border:0;
+  width:100%;
+  padding:10px 5px;
+  border-radius:8px;
+  background:linear-gradient(90deg,#00cce8,#0876e8);
+  color:white;
+  font-weight:bold;
+  cursor:pointer;
+}
+
+.watch-btn:disabled {
+  background:#344458;
+  color:#aab8c9;
+  cursor:not-allowed;
+}
+
+.notice {
+  background:#111f32;
+  border:1px solid #a855f744;
+  color:#c8d5e5;
+  border-radius:12px;
+  padding:14px;
+  margin-top:22px;
+  font-size:12px;
+  line-height:1.7;
+  text-align:center;
+}
+
+footer {
+  text-align:center;
+  color:#8295aa;
+  padding:25px 0 10px;
+  font-size:12px;
+}
+
+@media(max-width:350px) {
+  .video-grid {
+    grid-template-columns:1fr;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <h1>AZDAR ADS WATCHING</h1>
+  <p>Watch Videos • Complete Daily Tasks</p>
+</header>
+
+<!-- EARNING DISPLAY -->
+
+<div class="earning-box">
+  <small>TOTAL EARNING</small>
+  <div class="earning" id="earning">Rs. 0</div>
+
+  <div class="progress-info">
+    <span>Daily Progress</span>
+    <strong id="count">0 / 10</strong>
+  </div>
+
+  <div class="progress-bg">
+    <div class="progress-fill" id="progress"></div>
+  </div>
+</div>
+
+<h2 class="section-title">Available Videos (30)</h2>
+
+<div class="video-grid" id="videos"></div>
+
+<div class="notice">
+  Daily Limit: 10 Videos<br>
+  Video Duration: 10 Seconds<br>
+  Display Rate: Rs. 150 Per Video<br>
+  Daily Display Total: Rs. 1,500
+</div>
+
+<footer>
+  AZDAR ADS WATCHING<br>
+  Powered by AzDar Web Studio
+</footer>
+
+<script>
+
+// SETTINGS
+const DAILY_LIMIT = 10;
+const VIDEO_SECONDS = 10;
+const RATE = 150;
+
+// DEMO VIDEO SOURCES.
+// Add your own 30 licensed video URLs here.
+
+const sources = [
+"https://storage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
+"https://storage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4",
+"https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
+"https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4",
+"https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4",
+"https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4",
+"https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerMeltdowns.mp4",
+"https://storage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4",
+"https://storage.googleapis.com/gtv-videos-bucket/sample/SubaruOutbackOnStreetAndDirt.mp4",
+"https://storage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4",
+"https://storage.googleapis.com/gtv-videos-bucket/sample/VolkswagenGTIReview.mp4",
+"https://storage.googleapis.com/gtv-videos-bucket/sample/WeAreGoingOnBullrun.mp4",
+"https://storage.googleapis.com/gtv-videos-bucket/sample/WhatCarCanYouGetForAGrand.mp4"
+];
+
+// DAILY STORAGE
+
+function todayKey() {
+  return new Date().toLocaleDateString("en-CA");
+}
+
+function loadData() {
+  try {
+    const data = JSON.parse(
+      localStorage.getItem("azdar_daily_data")
+    );
+
+    if(data && data.date === todayKey()) {
+      return data;
+    }
+  } catch(e) {}
+
+  return {
+    date:todayKey(),
+    completed:[]
+  };
+}
+
+let data = loadData();
+
+function saveData() {
+  localStorage.setItem(
+    "azdar_daily_data",
+    JSON.stringify(data)
+  );
+}
+
+// TOP DISPLAY
+
+function updateDisplay() {
+  const total = data.completed.length;
+
+  document.getElementById("earning").textContent =
+    "Rs. " + (total * RATE).toLocaleString();
+
+  document.getElementById("count").textContent =
+    total + " / " + DAILY_LIMIT;
+
+  document.getElementById("progress").style.width =
+    (total / DAILY_LIMIT * 100) + "%";
+}
+
+// CREATE 30 VIDEO CARDS
+
+const videoContainer = document.getElementById("videos");
+
+for(let i=1;i<=30;i++) {
+
+  const card = document.createElement("div");
+  card.className = "video-card";
+
+  const isReady = Boolean(sources[i-1]);
+
+  card.innerHTML = `
+    ${isReady
+      ? `<video playsinline preload="metadata"></video>`
+      : `<div style="aspect-ratio:16/9;background:#192b40;
+          display:flex;align-items:center;justify-content:center;
+          color:#9bb0c7;border-radius:9px;font-size:12px">
+          VIDEO SOURCE REQUIRED
+        </div>`
+    }
+
+    <h3>Video ${i}</h3>
+
+    <div class="video-status" id="status${i}">
+      ${isReady ? "0 / 10 seconds" : "Add a video link"}
+    </div>
+
+    <div class="timer-bg">
+      <div class="timer-fill" id="bar${i}"></div>
+    </div>
+
+    <button class="watch-btn" id="btn${i}"
+      ${!isReady || data.completed.includes(i) ||
+        data.completed.length >= DAILY_LIMIT ? "disabled":""}>
+      ${data.completed.includes(i) ? "COMPLETED ✓" :
+        !isReady ? "NOT AVAILABLE" : "WATCH VIDEO"}
+    </button>
+  `;
+
+  videoContainer.appendChild(card);
+
+  if(!isReady) continue;
+
+  const video = card.querySelector("video");
+  const btn = document.getElementById("btn"+i);
+  const status = document.getElementById("status"+i);
+  const bar = document.getElementById("bar"+i);
+
+  video.src = sources[i-1];
+
+  let watched = 0;
+  let lastTime = null;
+  let running = false;
+  let completed = false;
+
+  // WATCH BUTTON
+
+  btn.addEventListener("click",async function() {
+
+    if(data.completed.length >= DAILY_LIMIT ||
+       completed || running) return;
+
+    running = true;
+    lastTime = null;
+
+    video.playbackRate = 1;
+
+    try {
+      await video.play();
+      btn.textContent = "WATCHING...";
+      btn.disabled = true;
+    } catch(e) {
+      running = false;
+      btn.disabled = false;
+      status.textContent = "Video could not play. Try again.";
+    }
+  });
+
+  // COUNT ONLY ACTUAL PLAYBACK PROGRESS
+
+  video.addEventListener("timeupdate",function() {
+
+    if(!running || completed || video.paused) return;
+
+    const current = video.currentTime;
+
+    if(lastTime !== null) {
+
+      const difference = current - lastTime;
+
+      if(difference > 0 && difference <= 1.5) {
+        watched += difference;
+      }
+    }
+
+    lastTime = current;
+
+    const seconds = Math.min(
+      VIDEO_SECONDS,
+      watched
+    );
+
+    status.textContent =
+      Math.floor(seconds) + " / 10 seconds";
+
+    bar.style.width =
+      (seconds / VIDEO_SECONDS * 100) + "%";
+
+    if(watched >= VIDEO_SECONDS) {
+
+      completed = true;
+      running = false;
+      video.pause();
+
+      data.completed.push(i);
+      saveData();
+
+      status.textContent = "COMPLETED ✓";
+      btn.textContent = "COMPLETED ✓";
+
+      updateDisplay();
+
+      // LOCK ALL REMAINING VIDEOS IF DAILY LIMIT REACHED
+
+      if(data.completed.length >= DAILY_LIMIT) {
+        lockRemaining();
+      }
+    }
+  });
+
+  // RESET PLAYBACK BASELINE ON SEEK / PAUSE
+
+  video.addEventListener("seeking",function() {
+    lastTime = null;
+  });
+
+  video.addEventListener("pause",function() {
+    lastTime = null;
+
+    if(running && !completed) {
+      running = false;
+      btn.disabled = false;
+      btn.textContent = "CONTINUE WATCHING";
+    }
+  });
+
+  // NO AUTOPLAY
+
+  video.addEventListener("ended",function() {
+    if(!completed) {
+      running = false;
+      btn.disabled = false;
+      btn.textContent = "WATCH AGAIN";
+      lastTime = null;
+    }
+  });
+
+  if(data.completed.includes(i)) {
+    completed = true;
+    watched = VIDEO_SECONDS;
+    status.textContent = "COMPLETED ✓";
+    bar.style.width = "100%";
+  }
+}
+
+// DAILY LIMIT LOCK
+
+function lockRemaining() {
+  document.querySelectorAll(".watch-btn").forEach(btn => {
+    if(!btn.textContent.includes("COMPLETED")) {
+      btn.disabled = true;
+      if(btn.textContent !== "NOT AVAILABLE") {
+        btn.textContent = "DAILY LIMIT REACHED";
+      }
+    }
+  });
+}
+
+// INITIAL DISPLAY
+
+updateDisplay();
+
+if(data.completed.length >= DAILY_LIMIT) {
+  lockRemaining();
+}
+
+</script>
+</body>
+</html>
